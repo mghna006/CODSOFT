@@ -1,0 +1,74 @@
+pip install scikit-surprise
+
+import pandas as pd
+from surprise import Dataset,Reader,SVD
+from surprise.model_selection import train_test_split
+
+data={
+    'user':['Meghana','Pooja','Saketh','Pooja'],
+    'item':['Sarkar','VIP','Jawan','Bahubali'],
+    'rating':[3,4,4,5],
+}
+
+reader=Reader(rating_scale=(1,10))
+df=pd.DataFrame(data)
+ 
+dataset=Dataset.load_from_df(df[['user','item','rating']],reader)
+
+trainset,testset=train_test_split(dataset,test_size=0.2,random_state=42)
+
+
+model=SVD()
+model.fit(trainset)
+
+def  get_top_n_recommendations(model,user_id,n=3):
+  items_rated_by_user=df[df['user']==user_id]['item'].tolist()
+  items_to_predict=[item for item in ['item'].unique() if item  in items_rated_by_user]
+
+  prediction =[(item,model.predict(user_id,item).est)for item in items_to_predict]
+  prediction.sort(key=lambda x: x[1],reverse =True)
+
+  return prediction[:n]
+
+
+user_id=input("Enter your username:")
+user_preference = input("Enter 'movie' or 'song' or 'podcast' :")
+
+
+if user_preference=='movie':
+  top_n_recommendations=get_top_n_recommendations(model,user_id,n=3)
+  print(f"\nTop 3 movie recommendation for user{user_id}:")
+  for item,est_rating in top_n_recommendations :
+    print(f"{item} with estimated rating: {est_rating}:")
+
+elif user_preference=='song':
+  print(f"\nTop  song recommendations for user {user_id}:")
+  print("Perfect by Ed Sheeran")
+  print("Chaleya from Jawan")
+  print("Oy..Oy.. from Oy")
+  print("Apna Bana Le from Bhediya")
+  print("Urike Urike from Hit 2")
+  print("Hua Main from Animal")
+  print("Satranga from Animal")
+  print("Hrudayama from Major")
+  print("Samyama from Hi Nanna")
+  print("Kurchi Madathapetti from Guntur Karam")
+  print("Galliya from Ek Villain")
+  print("Kesariya from Brahmastra")
+  print("Agar Tum Saath ho froM Tamasha")
+  print("Kannuladha from 3")
+
+elif user_preference=='podcast':
+  print(f"\nTop podcast recommendations for user {user_id}:")
+  print("Bhaskar Bose")
+  print("I hear you")
+  print("Khooni")
+  print("THe Horror Time Podcast")
+  print("The Desi Crime Podcast")
+  print("Rotten Mango")
+  print("The Ranveer Show")
+
+else:
+  print("Invalid preference")
+
+
